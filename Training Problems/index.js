@@ -73,7 +73,7 @@ function readProblemFile(text) {
 const fs = require('fs');
 
 // Read the text file and parse data
-const file = 'problem2.txt'; // Update with your file path
+const file = 'problem2.txt'; // Update file path
 const textData = fs.readFileSync(file, 'utf-8');
 const data = readProblemFile(textData);
 
