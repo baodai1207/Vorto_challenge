@@ -51,7 +51,7 @@ function nearestNeighbor(data) {
     } while (nearestLoadIndex !== -1 && remainingDriveTime >= 0);
 
     if (driverRoute.length > 0) {
-      // Ensure that the drive distance is less than 720, including depot trips
+      // Assigned the remaining loads to ensure that the drive distance is less than 720
       const remainingLoads = calculateEuclidean(currentPoint, startingPoint);
       remainingDriveTime -= remainingLoads;
       drivers.push(driverRoute);
