@@ -6,21 +6,22 @@ function nearestNeighbor(data) {
   const unvisitedLoads = [...data];
   const drivers = [];
 
-  // I have to change to for loop instead of while loop because it gave me weird errors 
-  // something about:
-  // Fatal JavaScript invalid size error 169220804
-  for (let i = 0; i < unvisitedLoads.length; i++) {
+  // While loop does a better job to loop through all the loads
+  while (unvisitedLoads.length > 0) {
     const driverRoute = [];
     const startingPoint = { x: 0, y: 0 }; // Depot location
     let currentPoint = startingPoint;
     let remainingDriveTime = 12 * 60; // 12 hours in minutes;
+    let nearestLoadIndex;
+    let shortestDistance;
 
-    for (let j = 0; j < unvisitedLoads.length; j++) {
-      let shortestDistance = Infinity;
-      let nearestLoadIndex = -1;
-
-      for (let k = 0; k < unvisitedLoads.length; k++) {
-        const load = unvisitedLoads[k];
+    // Change to do-while loop here to avoid JavaScript Size error
+    do {
+      nearestLoadIndex = -1;
+      shortestDistance = Infinity;
+      // Loop through all the loads
+      for (let i = 0; i < unvisitedLoads.length; i++) {
+        const load = unvisitedLoads[i];
         const pickupPoint = load.pickup;
         const dropoffPoint = load.dropoff;
         const pickupDistance = calculateEuclidean(currentPoint, pickupPoint);
@@ -30,36 +31,31 @@ function nearestNeighbor(data) {
 
         if (totalDistance < shortestDistance && remainingDriveTime >= totalDistance) {
           shortestDistance = totalDistance;
-          nearestLoadIndex = k;
+          nearestLoadIndex = i;
         }
       }
 
+      // If the nearestLoadIndex not equal -1, it means a load was found
       if (nearestLoadIndex !== -1) {
         const nearestLoad = unvisitedLoads[nearestLoadIndex];
         driverRoute.push(nearestLoad.loadNumber);
         currentPoint = nearestLoad.dropoff;
         remainingDriveTime -= shortestDistance;
         unvisitedLoads.splice(nearestLoadIndex, 1);
-      } else {
-        // If there are no suitable loads, check if there are loads in the route
-        if (driverRoute.length > 0) {
-          // return to the depot
-          const returnDistance = calculateEuclidean(currentPoint, startingPoint);
-          remainingDriveTime -= returnDistance;
-          currentPoint = startingPoint;
-          break;
-        } else {
-          break; // End the route if no suitable loads
-        }
+      } else if (driverRoute.length > 0) {
+        // Return to the depot if there are loads in the route
+        const returnDistance = calculateEuclidean(currentPoint, startingPoint);
+        remainingDriveTime -= returnDistance;
+        currentPoint = startingPoint;
       }
+    } while (nearestLoadIndex !== -1 && remainingDriveTime >= 0);
 
-      // Check if the 12 hour shift is exceeded
-      if (remainingDriveTime < 0) {
-        break; 
-      }
+    if (driverRoute.length > 0) {
+      // Ensure that the drive distance is less than 720, including depot trips
+      const remainingLoads = calculateEuclidean(currentPoint, startingPoint);
+      remainingDriveTime -= remainingLoads;
+      drivers.push(driverRoute);
     }
-
-    drivers.push(driverRoute);
   }
 
   return drivers;
